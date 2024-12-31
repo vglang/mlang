@@ -50,13 +50,32 @@ pub struct Attr {
     /// the non-inherited properties
     pub fields: Vec<Field>,
 }
+/// Defines an data.
+#[derive(Debug, Default, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct Data {
+    /// The identifier name of this element.
+    pub ident: Option<Ident>,
+    /// the non-inherited properties
+    pub fields: Vec<Field>,
+}
+
+/// Defines an enum data.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct Enum {
+    /// The identifier name of this element.
+    pub ident: Ident,
+    /// the non-inherited properties
+    pub fields: Vec<(Ident, Data)>,
+}
 
 /// The property of one node or attr.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Field {
     /// filed name,
-    pub ident: Ident,
+    pub ident: Option<Ident>,
     /// The type of this field.
     pub ty: Type,
     /// Indicate this field is optional.
@@ -69,7 +88,12 @@ pub struct Field {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Type {
+    None,
     String,
+    Byte,
+    Ubyte,
+    Short,
+    Ushort,
     Int,
     Uint,
     Long,
@@ -78,6 +102,8 @@ pub enum Type {
     Double,
     /// Data reference by `ident`.
     Data(Ident),
+    /// enum data reference by `ident`.
+    Enum(Ident),
     /// This type is a listof `type`.
     ListOf(Box<Type>),
 }
@@ -89,4 +115,6 @@ pub enum Opcode {
     Element(Box<Element>),
     Leaf(Box<Leaf>),
     Attr(Box<Attr>),
+    Data(Box<Data>),
+    Enum(Box<Enum>),
 }

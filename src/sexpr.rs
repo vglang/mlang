@@ -114,6 +114,76 @@ impl Attr {
     }
 }
 
+impl<T> From<T> for Data
+where
+    Ident: From<T>,
+{
+    fn from(value: T) -> Self {
+        Self {
+            ident: Some(value.into()),
+            fields: vec![],
+        }
+    }
+}
+
+impl From<Field> for Data {
+    fn from(value: Field) -> Self {
+        Self {
+            ident: None,
+            fields: vec![value],
+        }
+    }
+}
+
+impl From<Type> for Data {
+    fn from(value: Type) -> Self {
+        Self {
+            ident: None,
+            fields: vec![Field::from(value)],
+        }
+    }
+}
+
+impl Data {
+    /// update `allow_attrs` field.
+    pub fn fields<I>(mut self, fields: I) -> Self
+    where
+        I: IntoIterator,
+        Field: From<I::Item>,
+    {
+        self.fields = fields.into_iter().map(|i| i.into()).collect();
+        self
+    }
+}
+
+impl<T> From<T> for Enum
+where
+    Ident: From<T>,
+{
+    fn from(value: T) -> Self {
+        Self {
+            ident: value.into(),
+            fields: vec![],
+        }
+    }
+}
+
+impl Enum {
+    /// update `fields` field.
+    pub fn fields<I, N, F>(mut self, fields: I) -> Self
+    where
+        I: IntoIterator<Item = (N, F)>,
+        Ident: From<N>,
+        Data: From<F>,
+    {
+        self.fields = fields
+            .into_iter()
+            .map(|(n, f)| (n.into(), f.into()))
+            .collect();
+        self
+    }
+}
+
 impl<I, T> From<(I, T)> for Field
 where
     Ident: From<I>,
@@ -121,8 +191,22 @@ where
 {
     fn from(value: (I, T)) -> Self {
         Self {
-            ident: value.0.into(),
+            ident: Some(value.0.into()),
             ty: value.1.into(),
+            optional: false,
+            variable: false,
+        }
+    }
+}
+
+impl<T> From<T> for Field
+where
+    Type: From<T>,
+{
+    fn from(value: T) -> Self {
+        Self {
+            ident: None,
+            ty: value.into(),
             optional: false,
             variable: false,
         }
@@ -161,6 +245,18 @@ impl From<Attr> for Opcode {
     }
 }
 
+impl From<Data> for Opcode {
+    fn from(value: Data) -> Self {
+        Self::Data(Box::new(value))
+    }
+}
+
+impl From<Enum> for Opcode {
+    fn from(value: Enum) -> Self {
+        Self::Enum(Box::new(value))
+    }
+}
+
 impl Type {
     /// Create a data type.
     pub fn data<T>(ident: T) -> Type
@@ -168,6 +264,14 @@ impl Type {
         Ident: From<T>,
     {
         Type::Data(ident.into())
+    }
+
+    /// Create a enum data type.
+    pub fn enum_data<T>(ident: T) -> Type
+    where
+        Ident: From<T>,
+    {
+        Type::Enum(ident.into())
     }
 
     /// Convert self into a list of `Type`.
