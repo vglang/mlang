@@ -6,15 +6,6 @@
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Ident(pub String);
 
-// impl<T> From<T> for Ident
-// where
-//     String: From<T>,
-// {
-//     fn from(value: T) -> Self {
-//         Self(value.into())
-//     }
-// }
-
 /// Defines a non-leaf node.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -88,7 +79,6 @@ pub struct Field {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Type {
-    None,
     String,
     Byte,
     Ubyte,

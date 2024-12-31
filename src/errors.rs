@@ -1,5 +1,5 @@
 #[derive(thiserror::Error, Debug)]
-pub enum Error {
+pub enum Error<'a> {
     #[error("Invalid ident: {0}")]
-    Ident(String),
+    Ident(&'a str),
 }
