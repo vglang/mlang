@@ -1,2 +1,2 @@
 # mlang
-A functional verification language for declarative/markup language .
+A schema declaration language for declarative/markup language .
