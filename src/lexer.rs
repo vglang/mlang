@@ -9,6 +9,9 @@ use crate::errors::Error;
 pub enum Token<'a> {
     /// identifier for nodes or filed.
     Ident(&'a str),
+    /// A comment line.
+    Comment(&'a str),
+    /// literal u32 number.
     LitNum(u32),
     /// keyword `tuple`
     Tuple,
@@ -22,6 +25,8 @@ pub enum Token<'a> {
     Enum,
     /// keyword `data`
     Data,
+    /// keyword `bool`
+    Bool,
     /// keyword `string`
     String,
     /// keyword `byte`
@@ -52,6 +57,10 @@ pub enum Token<'a> {
     Optional,
     /// keyword `variable`
     Variable,
+    /// keyword `mixin`
+    Mixin,
+    /// keyword `any`
+    Any,
     /// `{` (punct.)
     StartBlock,
     /// `}` (punct.)
@@ -90,7 +99,7 @@ impl<'a> From<&'a str> for Lexer<'a> {
         Self {
             iter: value.char_indices().peekable(),
             input: value,
-            lines: 0,
+            lines: 1,
             cols: 0,
         }
     }
@@ -134,11 +143,11 @@ impl<'a> Lexer<'a> {
         end
     }
 
-    fn check_ident(ident: &str) -> Result<Token<'_>, Error> {
+    fn check_ident(&self, ident: &'a str) -> Result<Token<'a>, Error<'a>> {
         assert!(!ident.is_empty());
 
         if ident.chars().next().unwrap().is_ascii_digit() {
-            return Err(Error::Ident(ident));
+            return Err(Error::Ident(ident, self.lines, self.cols));
         }
 
         return Ok(Token::Ident(ident));
@@ -218,6 +227,23 @@ impl<'a> Iterator for Lexer<'a> {
                     }
                     self.skip_ws();
                 }
+                '/' => {
+                    if self.iter.next_if(|(_, c)| *c == '/').is_none() {
+                        return Some(Err(Error::Comment(self.lines, self.cols)));
+                    }
+
+                    if self.iter.next_if(|(_, c)| *c == '/').is_none() {
+                        return Some(Err(Error::Comment(self.lines, self.cols)));
+                    }
+
+                    let mut end = offset + 1;
+
+                    while let Some((next, _)) = self.iter.next_if(|(_, c)| *c != '\n') {
+                        end = next;
+                    }
+
+                    return Some(Ok(Token::Comment(&self.input[offset..end].trim())));
+                }
                 _ => {
                     // is lit number.
                     if next.is_ascii_digit() {
@@ -236,7 +262,7 @@ impl<'a> Iterator for Lexer<'a> {
 
                     match ident {
                         "tuple" => return Some(Ok(Token::Tuple)),
-                        "element" => return Some(Ok(Token::El)),
+                        "el" => return Some(Ok(Token::El)),
                         "leaf" => return Some(Ok(Token::Leaf)),
                         "attr" => return Some(Ok(Token::Attr)),
                         "enum" => return Some(Ok(Token::Enum)),
@@ -256,7 +282,10 @@ impl<'a> Iterator for Lexer<'a> {
                         "->" => return Some(Ok(Token::ArrowRight)),
                         "optional" => return Some(Ok(Token::Optional)),
                         "variable" => return Some(Ok(Token::Variable)),
-                        _ => return Some(Self::check_ident(ident)),
+                        "bool" => return Some(Ok(Token::Bool)),
+                        "mixin" => return Some(Ok(Token::Mixin)),
+                        "any" => return Some(Ok(Token::Any)),
+                        _ => return Some(self.check_ident(ident)),
                     }
                 }
             }
