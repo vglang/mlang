@@ -1,2 +1,2 @@
 # mlang
-A programming language to define declarative programming language .
+A functional verification language for declarative/markup language .
