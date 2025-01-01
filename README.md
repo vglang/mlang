@@ -1,2 +1,2 @@
 # mlang
-A programming language to define declarative programming language .
+A schema declaration language for declarative/markup language .
