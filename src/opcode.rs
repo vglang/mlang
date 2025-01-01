@@ -103,6 +103,7 @@ pub enum Type {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Opcode {
+    Comment(String),
     Element(Box<Element>),
     Leaf(Box<Leaf>),
     Attr(Box<Attr>),

@@ -12,6 +12,8 @@ thiserror = "^2.0"
 log = "^0.4"
 pretty_env_logger = "^0.5"
 serde = { version = "^1.0", features = ["derive"], optional = true }
+nom_locate = "^4"
+nom = "^7"
 
 [features]
 default = ["serde"]

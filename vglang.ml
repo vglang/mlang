@@ -1754,7 +1754,7 @@ el Group;
 /// or any combination of the three.
 leaf Path {
     /// The definition of the outline of a shape.
-    data: variable Vec<PathEvent,
+    data: variable vec[PathEvent],
 
     /// The author's computation of the total length of the path, in user units.
     /// This value is used to calibrate the user agent's own distance-along-a-path
@@ -1815,7 +1815,7 @@ el Pattern {
     /// from object bounding box units to user space.
     ///
     /// If attribute `transform` is not specified, then the effect is as if an identity transform were specified.
-    transform: optional variable  Transform,
+    transform: optional variable Transform,
 
     /// ‘x’, ‘y’, ‘width’ and ‘height’ indicate how the pattern tiles are placed and spaced. These attributes represent
     /// coordinates and values in the coordinate space specified by the combination of attributes [`units`](Self::units) and
